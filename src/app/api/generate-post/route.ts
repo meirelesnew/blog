@@ -4,6 +4,13 @@ import { sql, createPostsTable } from "@/lib/db";
 
 export async function GET() {
   try {
+    if (!sql) {
+      return NextResponse.json(
+        { success: false, error: "DATABASE_URL não configurada." },
+        { status: 500 }
+      );
+    }
+
     await createPostsTable();
 
     const post = await generateFlamengoPost();
