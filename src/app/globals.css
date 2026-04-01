@@ -1,10 +1,21 @@
-@import "tailwindcss";
-
 @theme {
   --color-brand-red: #da291c;
   --font-inter: "Inter", sans-serif;
+  
+  @keyframes shine {
+    from { left: -100%; }
+    to { left: 100%; }
+  }
+  --animate-shine: shine 3s infinite;
 }
 
 body {
   font-family: var(--font-inter);
+  background: radial-gradient(circle at top center, #18181b 0%, #09090b 100%);
+  color: #f4f4f5;
+}
+
+::selection {
+  background: #da291c;
+  color: white;
 }

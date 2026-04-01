@@ -20,8 +20,18 @@ jobs:
       - name: Install dependencies
         run: npm install
         
+      - name: Validate Environment and Connectivity
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then echo "::error::GEMINI_API_KEY is missing"; fi
+          if [ -z "$DATABASE_URL" ]; then echo "::error::DATABASE_URL is missing"; fi
+          # Test connectivity to Neon (basic ping or nc)
+          nc -zv -w5 pg.neon.tech 5432 || echo "::warning::Could not connect to Neon Postgres"
+
       - name: Run Post Generation Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POST_CONTEXT: "Gere um post com as últimas notícias do Flamengo de hoje."
         run: npm run generate-post
