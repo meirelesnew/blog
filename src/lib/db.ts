@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+﻿import { neon } from "@neondatabase/serverless";
 
 export interface Post {
   id?: number;
@@ -27,9 +27,8 @@ export async function createPostsTable() {
   `;
 }
 
-export async function getRecentPosts(limit = 10) {
+export async function getRecentPosts(limit = 10): Promise<Post[]> {
   if (!sql) {
-    // Mock data for UI demonstration
     return [
       {
         id: 1,
@@ -37,6 +36,7 @@ export async function getRecentPosts(limit = 10) {
         excerpt: "Em uma noite inspirada, o Mais Querido dominou a partida do início ao fim, garantindo três pontos fundamentais na tabela.",
         content: "O Flamengo entrou em campo com sede de vitória...",
         tags: ["Maracanã", "Brasileirão", "Vitoria"],
+        category: "Notícia",
         created_at: new Date()
       },
       {
@@ -45,13 +45,15 @@ export async function getRecentPosts(limit = 10) {
         excerpt: "Como as novas tecnologias estão ajudando o Mengão a mapear adversários e otimizar o rendimento dos atletas.",
         content: "A tecnologia se tornou aliada inseparável do futebol moderno...",
         tags: ["Tecnologia", "Analise", "Evolucao"],
+        category: "Análise",
         created_at: new Date(Date.now() - 86400000)
       }
     ];
   }
-  return await sql`
+  const rows = await sql`
     SELECT * FROM posts 
     ORDER BY created_at DESC 
     LIMIT ${limit}
   `;
+  return rows as Post[];
 }
