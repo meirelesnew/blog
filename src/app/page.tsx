@@ -1,4 +1,4 @@
-import { getRecentPosts } from "@/lib/db";
+﻿import { getRecentPosts, createPostsTable } from "@/lib/db";
 import PostList from "@/components/PostList";
 import GenerateButton from "@/components/GenerateButton";
 import LeagueTables from "@/components/LeagueTables";
@@ -7,6 +7,7 @@ import { Newspaper, Flame, Activity } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  await createPostsTable();
   const posts = await getRecentPosts(20);
 
   return (
@@ -52,7 +53,7 @@ export default async function Home() {
             ÚLTIMAS DO MAIS QUERIDO
           </h3>
           <span className="text-zinc-500 font-bold text-sm bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-800 uppercase tracking-wide">
-            {posts.length} {posts.length === 1 ? 'POST' : 'POSTS'} DISPONÍVEIS
+            {posts.length} {posts.length === 1 ? "POST" : "POSTS"} DISPONÍVEIS
           </span>
         </div>
 
@@ -70,7 +71,6 @@ export default async function Home() {
         )}
       </section>
 
-      {/* Decorative background element */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
     </div>
   );
