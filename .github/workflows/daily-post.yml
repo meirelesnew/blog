@@ -1,37 +1,25 @@
-name: Daily Post Generation
+﻿import { NextResponse } from "next/server";
+import { generateFlamengoPost } from "@/lib/gemini";
+import { sql, createPostsTable } from "@/lib/db";
 
-on:
-  schedule:
-    - cron: '0 9 * * *' # Executa todo dia às 09:00 UTC (06:00 BRT)
-  workflow_dispatch: # Permite execução manual pelo painel do GitHub
+export async function GET() {
+  try {
+    await createPostsTable();
 
-jobs:
-  generate-post:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm install
-        
-      - name: Validate Environment and Connectivity
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          if [ -z "$GEMINI_API_KEY" ]; then echo "::error::GEMINI_API_KEY is missing"; fi
-          if [ -z "$DATABASE_URL" ]; then echo "::error::DATABASE_URL is missing"; fi
-          # Test connectivity to Neon (basic ping or nc)
-          nc -zv -w5 pg.neon.tech 5432 || echo "::warning::Could not connect to Neon Postgres"
-
-      - name: Run Post Generation Script
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          POST_CONTEXT: "Gere um post com as últimas notícias do Flamengo de hoje."
-        run: npm run generate-post
+    const post = await generateFlamengoPost();
+    
+    const [savedPost] = await sql`
+      INSERT INTO posts (title, content, excerpt, tags, category)
+      VALUES (${post.title}, ${post.content}, ${post.excerpt}, ${post.tags}, ${post.category})
+      RETURNING *
+    `;
+    
+    return NextResponse.json({ success: true, post: savedPost });
+  } catch (error: any) {
+    console.error("Error generating post:", error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
