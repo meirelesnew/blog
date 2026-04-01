@@ -1,0 +1,27 @@
+name: Daily Post Generation
+
+on:
+  schedule:
+    - cron: '0 9 * * *' # Executa todo dia às 09:00 UTC (06:00 BRT)
+  workflow_dispatch: # Permite execução manual pelo painel do GitHub
+
+jobs:
+  generate-post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Run Post Generation Script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run generate-post
